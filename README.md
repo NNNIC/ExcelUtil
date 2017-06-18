@@ -10,7 +10,7 @@ Excel Utility in C#
 
     #1. Use Microsoft soft original dll only
     #2. Quick Access
-    #3. Capable to attach to the opened excel window
+    #3. Capable to attach to the excel window
     #4. Simple Interface
 
     <<Sammary>>
