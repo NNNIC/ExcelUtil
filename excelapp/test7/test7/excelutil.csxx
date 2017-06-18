@@ -1,0 +1,245 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using Microsoft.Office.Interop.Excel;
+using Microsoft.VisualBasic;
+using System.Runtime.InteropServices;
+using ExcelApplication = Microsoft.Office.Interop.Excel.Application;
+
+public class excelutil
+{
+    public class App : IDisposable
+    {
+        public ExcelApplication m_application;
+        public Workbooks        m_workbooks;
+
+        public List<Book> m_bookList = new List<Book>();
+
+        public void Create(ExcelApplication app=null)
+        {
+            m_application = app;
+            if (m_application==null)
+            {
+                m_application = new ExcelApplication();
+            }
+            m_application.DisplayAlerts = false;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                //mangedリリース
+                try {
+                    if (m_bookList!=null) foreach(var b in m_bookList) {  b.Dispose(); }
+                } finally { m_bookList = null; }
+            }
+            else           
+            {
+                try {
+                    if (m_workbooks!=null) Marshal.ReleaseComObject(m_workbooks);
+                } finally { m_workbooks = null; }
+
+                try {
+                    if (m_application!=null)
+                    {
+                        try { m_application.Quit(); } finally {  Marshal.ReleaseComObject(m_application); }
+                    }
+                } finally { m_application = null; }
+            }
+        }
+        ~App() { Dispose(false); }
+
+        public Book Open(string path)
+        {
+            var fullpath = Path.GetFullPath(path);
+            var find = m_bookList.Find(i=>i.m_path==fullpath);
+            if (find!=null)
+            {
+                return find;
+            }
+
+            var book = new Book(this);
+            book.OpenBook(fullpath);
+
+            return null;
+        }
+    }
+
+    public class Book : IDisposable
+    {
+        public App     m_excelApp;
+        public string       m_path;
+        public Workbooks    m_workbooks { get { return m_excelApp.m_workbooks; } }
+        public Workbook     m_workbook;
+        public List<Sheet>  m_sheetList;
+
+        public Book(App app) { m_excelApp = app; }
+
+        public void OpenBook(string path)
+        {
+            m_path = path;
+            
+            try {
+                if (File.Exists(path))
+                {
+                    m_workbook = m_workbooks.Open(path);
+                }
+                else
+                {
+                    m_workbook = m_workbooks.Add();
+                }
+            }
+            catch {
+                Dispose();
+                m_excelApp.Dispose();
+                throw new SystemException();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                try {
+                    foreach(var s in m_sheetList)
+                    {
+                        s.Dispose();
+                    }
+                } finally
+                {
+                    m_sheetList = null;
+                }
+            }
+            else           
+            {
+                try {
+                    if (m_workbook!=null)
+                    {
+                        try { m_workbook.Close(false); } catch { }
+                        Marshal.ReleaseComObject(m_workbook);
+                    }
+                } finally
+                {
+                    m_workbook = null;
+                }
+            }
+        }
+
+        public Sheet OpenSheet(string sheetname)
+        {
+            Sheet sheet = null;
+            Worksheet worksheet = null;
+            var index = GetSheetIndex(m_workbook,sheetname);
+            if (index >=0)
+            {
+                var ws = m_workbook.Sheets[index+1];
+
+            }
+
+            return null;
+        }
+        public Sheet OpenSheet(int index)
+        {
+            return null;
+        }
+        public void Remove(Sheet sheet)
+        {
+        }
+    }
+    public class Sheet : IDisposable
+    {
+        public Book      m_book;
+        public Worksheet m_worksheet;
+        public Workbook  m_workbook { get { return m_book.m_workbook;} }
+        public string    m_name     { get { return m_worksheet.Name; } }
+        public int       m_index    { get { return GetSheetIndex(m_workbook,m_name); } }
+
+        public Sheet(Book book, Worksheet worksheet)
+        {
+            m_book      = book;
+            m_worksheet = worksheet;
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                //mangedリリース
+            }
+            try
+            {
+                if (m_worksheet!=null)
+                {
+                    Marshal.ReleaseComObject(m_worksheet);
+                }
+            }
+            finally { m_worksheet = null; }
+        }
+        ~Sheet() { Dispose(false);    }
+    }
+    
+    public static Book OpenBook(string path) //※  ExcelAppのポインタはBookから取得可能
+    {
+        var app = new App();
+        return app.Open(path);
+    }
+    public static App  Open()
+    {
+        return new App();
+    }
+    public static Book AttachBook(string path) //既に開いているエクセルを操作
+    {
+        ExcelApplication excelapp = null;
+        try { excelapp = (ExcelApplication)Interaction.GetObject(Path.GetFullPath(path),"Excel.Application"); }catch { excelapp = null;}
+
+        App app = null;
+        try {
+            if (excelapp!=null)
+            {
+                app = new App();
+                app.Create(excelapp);
+                return app.Open(path);
+            }
+        }
+        catch {
+            if (app!=null)
+            {
+                app.Dispose();
+            }
+            throw new SystemException();
+        }
+        return null;
+    }
+    
+    static int GetSheetIndex(Workbook wb,string name)
+    {
+        for(var i = 0; i<wb.Sheets.Count; i++)
+        {
+            var s = (Worksheet)wb.Sheets[i];
+            if (s.Name == name)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }   
+}
