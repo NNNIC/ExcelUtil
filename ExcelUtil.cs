@@ -23,7 +23,7 @@ using _Application = Microsoft.Office.Interop.Excel.Application;
 
     #1. Use Microsoft soft original dll only
     #2. Quick Access
-    #3. Capable to attach to the opened excel window
+    #3. Attachable to exisiting excel windows
     #4. Simple Interface
 
     <<Sammary>>
@@ -47,7 +47,7 @@ using _Application = Microsoft.Office.Interop.Excel.Application;
 
 public partial class ExcelUtil
 {
-    static void ShowError(string msg)
+    static void ShowMsg(string msg)
     {
 #if WINAPP
         MessageBox.Show(msg);
@@ -119,6 +119,7 @@ public partial class ExcelUtil
 
     public class BookCtr : IDisposable
     {
+               bool           m_bAttached;
                AppCtr         m_appCtr;
                _Application   m_app { get { return m_appCtr.m_application; } }
                Workbooks      m_wbs { get { return m_appCtr.m_workbooks;   } }
@@ -127,11 +128,12 @@ public partial class ExcelUtil
                List<SheetCtr> m_sheetCtr_list = new List<SheetCtr>();
 
         public BookCtr() { }
-        public BookCtr(_Application app, Workbooks wbs, Workbook wb, string path)
+        public BookCtr(_Application app, Workbooks wbs, Workbook wb, string path, bool bAttached=false)
         {
-            m_appCtr = new AppCtr(app, wbs);
-            m_wb     = wb;
-            m_path   = path;
+            m_bAttached = true;
+            m_appCtr    = new AppCtr(app, wbs);
+            m_wb        = wb;
+            m_path      = path;
         }
         
         public BookCtr OpenNewBook(string path)
@@ -218,7 +220,7 @@ public partial class ExcelUtil
             }
             if (!bOk)
             {
-                ShowError("Faild to write");
+                ShowMsg("Faild to write");
             }
         }
         public void WriteAs(string path) {
@@ -232,7 +234,7 @@ public partial class ExcelUtil
             }
             if (!bOk)
             {
-                ShowError("Failed to write");
+                ShowMsg("Failed to write");
             }
         }
         public void Close() {
@@ -257,7 +259,7 @@ public partial class ExcelUtil
             }
             try {
                 if (m_wb!=null) {
-                    try { m_wb.Close(false); } catch { }
+                    try { if (!m_bAttached) m_wb.Close(false); } catch { }
                     Marshal.ReleaseComObject(m_wb);
                     m_wb = null;
                 }
@@ -407,8 +409,10 @@ public partial class ExcelUtil
         }
         return new BookCtr(app,wbs,wb,fullpath);   
     }
-    public static BookCtr AttackBook(string path)
+    public static BookCtr AttackBook(string path=null)
     {
+        if (path==null) return _attachBookAny();
+
         var fullpath = Path.GetFullPath(path);
 
         _Application app = null;
@@ -428,8 +432,6 @@ public partial class ExcelUtil
             else
             {
                 wb = wbs.Add();
-                
-                
             }
         }
         catch
@@ -454,8 +456,49 @@ public partial class ExcelUtil
         }
         return new BookCtr(app,wbs,wb,fullpath);   
     }
+    private static BookCtr _attachBookAny()
+    {
+        string fullpath = null;
+        _Application app = null;
+        Workbooks    wbs = null;
+        Workbook     wb  = null;
+        
+        
+        try { app = (_Application)Interaction.GetObject(null,"Excel.Application"); } catch {app=null;}
+        if (app==null) return null;
 
+        try {
+            app.DisplayAlerts = false;
+            wbs = app.Workbooks;
+            wb =  app.ActiveWorkbook;
 
+            try { fullpath = Path.GetFullPath(wb.Path); } catch { fullpath=null; }
+        }
+        catch
+        {
+            if (wb!=null)
+            {   
+                try {  wb.Close(false); } catch { }
+                Marshal.ReleaseComObject(wb);
+                wb = null;
+            }
+            if (wbs!=null)
+            {
+                Marshal.ReleaseComObject(wbs);
+                wbs = null;
+            }
+            if (app!=null)
+            {
+                Marshal.ReleaseComObject(app);
+                app = null;
+            }
+            return null;
+        }
+
+        ShowMsg("Attached!");
+
+        return new BookCtr(app,wbs,wb,fullpath,true);   
+    }
 #region tool
 
     //エクセルカラム(ベース１)をアルファベット文字へ

@@ -47,8 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="excelutil.csxx" />
-    <Compile Include="ExcelUtil.cs" />
+    <Compile Include="..\..\..\ExcelUtil.cs">
+      <Link>ExcelUtil.cs</Link>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

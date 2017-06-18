@@ -58,15 +58,16 @@ namespace test7
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var cols = 10;
-            var rows = 2;
-            var objs = m_sheet.GetValues(rows,cols);
+            var objs = m_sheet.GetValues();
             var str = string.Empty;
             for(var x = 1; x<=objs.GetLength(0) ; x++) for(var y = 1; y<=objs.GetLength(1); y++)
             {
                 if (str!=string.Empty) str += ",";
                 var o = objs[x,y];
-                str += o.ToString();
+                if (o!=null)
+                {
+                    str += o.ToString();
+                }
             }
             MessageBox.Show(str);
         }
@@ -78,7 +79,21 @@ namespace test7
 
         private void button5_Click(object sender, EventArgs e)
         {
-            m_bc = ExcelUtil.AttackBook(m_sample_xls_file);
+            m_bc = ExcelUtil.AttackBook();
+            if (m_bc!=null)
+            {
+                m_sheet = m_bc.GetActiveSheet();
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var objs = m_sheet.GetValues(1000,200);
+            for(var x = 1; x<=objs.GetLength(0) ; x++) for(var y = 1; y<=objs.GetLength(1); y++)
+            {
+                objs[x,y] = x.ToString("0000") + "," + y.ToString("0000");
+            }
+            m_sheet.SetValues(objs);
         }
     }
 }
