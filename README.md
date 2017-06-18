@@ -3,7 +3,7 @@ Excel Utility in C#
 
    Excel Utility (C) 2017 NNNIC /  ZIP LICENSE
 
-   File : excelapp\test7\test7\ExcelUtil.cs
+   File : ExcelUtil.cs
    
    The vs project is for test. 
 
