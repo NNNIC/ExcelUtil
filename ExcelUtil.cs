@@ -17,8 +17,7 @@ using System.Windows.Forms;
 using _Application = Microsoft.Office.Interop.Excel.Application;
 
 /*
-    Excel Utility (C) 2017 NNNIC /  ZIP LICENSE
-
+    Excel Utility (C) 2017 NNNIC 
     Futures
 
     #1. Use Microsoft soft original dll only
