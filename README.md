@@ -3,6 +3,9 @@ Excel Utility in C#
 
    Excel Utility (C) 2017 NNNIC /  ZIP LICENSE
 
+   File : excelapp\test7\test7\ExcelUtil.cs
+
+
     Futures
 
     #1. Use Microsoft soft original dll only
