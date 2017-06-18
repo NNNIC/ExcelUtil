@@ -1,7 +1,7 @@
 # ExcelUtil
 Excel Utility in C#
 
-   Excel Utility (C) 2017 NNNIC /  ZIP LICENSE
+   Excel Utility (C) 2017 NNNIC 
 
    File : ExcelUtil.cs
    
