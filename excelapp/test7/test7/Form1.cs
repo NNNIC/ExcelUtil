@@ -79,7 +79,7 @@ namespace test7
 
         private void button5_Click(object sender, EventArgs e)
         {
-            m_bc = ExcelUtil.AttackBook();
+            m_bc = ExcelUtil.AttachBook();
             if (m_bc!=null)
             {
                 m_sheet = m_bc.GetActiveSheet();
