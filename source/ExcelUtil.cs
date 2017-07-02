@@ -408,7 +408,7 @@ public partial class ExcelUtil
         }
         return new BookCtr(app,wbs,wb,fullpath);   
     }
-    public static BookCtr AttackBook(string path=null)
+    public static BookCtr AttachBook(string path=null)
     {
         if (path==null) return _attachBookAny();
 
