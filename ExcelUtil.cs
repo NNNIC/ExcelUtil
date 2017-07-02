@@ -408,7 +408,7 @@ public partial class ExcelUtil
         }
         return new BookCtr(app,wbs,wb,fullpath);   
     }
-    public static BookCtr AttachBook(string path=null)
+    public static BookCtr AttackBook(string path=null)
     {
         if (path==null) return _attachBookAny();
 
@@ -504,7 +504,7 @@ public partial class ExcelUtil
     // ref https://support.microsoft.com/ja-jp/help/833402/how-to-convert-excel-column-numbers-into-alphabetical-characters
     // ref https://memo-c-sharp.blogspot.jp/2015/09/excel.html
     // ref https://stackoverflow.com/questions/181596/how-to-convert-a-column-number-eg-127-into-an-excel-column-eg-aa
-    static string _toAlphabet_nb1(int columnNumberOneBased)
+    public static string _toAlphabet_nb1(int columnNumberOneBased)
     {
         int baseValue = Convert.ToInt32('A');
         int columnNumberZeroBased = columnNumberOneBased - 1;
@@ -520,7 +520,7 @@ public partial class ExcelUtil
     }
 
     //エクセルカラム文字列を数字(ベース１)へ
-    static int _toNum_nb1(string str)
+    public static int _toNum_nb1(string str)
     {
         if (str.Length>0 &&  char.IsDigit(str[0]))
         {
