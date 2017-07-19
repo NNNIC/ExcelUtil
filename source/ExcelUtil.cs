@@ -41,7 +41,7 @@ using _Application = Microsoft.Office.Interop.Excel.Application;
 
     BookCtr book = ExcelUtil.AttachBook(path); //Attach to a existing excelwindow
 
-
+	http://www.transsoft.co.jp/blog/?p=1775
 */
 
 public partial class ExcelUtil
@@ -102,6 +102,7 @@ public partial class ExcelUtil
             if (m_application!=null)
             {
                 try {
+					m_application.Quit();
                     Marshal.ReleaseComObject(m_application);  
                 } finally
                 {
@@ -258,7 +259,7 @@ public partial class ExcelUtil
             }
             try {
                 if (m_wb!=null) {
-                    try { if (!m_bAttached) m_wb.Close(false); } catch { }
+                    try {  m_wb.Close(false); } catch { }
                     Marshal.ReleaseComObject(m_wb);
                     m_wb = null;
                 }
